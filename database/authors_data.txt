@@ -1,0 +1,3 @@
+Joakim;Veevalaja;5;1
+Joakim;Slim;0;5
+Rait;Nigol;5
