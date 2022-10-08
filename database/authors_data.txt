@@ -1,3 +1,3 @@
-Joakim;Veevalaja;5;1
-Joakim;Slim;0;5
-Rait;Nigol;5
+1;Joakim;Veevalaja;5
+2;Rait;Nigol;4
+3;Magnus;Makarov;3

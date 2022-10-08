@@ -5,6 +5,17 @@
 $first_name_error = false;
 $last_name_error = false;
 
+// generate id + get last id
+$author_ids = array();
+foreach(file('database/authors_data.txt') as $line) {
+    $author_data = explode(";", $line);
+    $author_id = $author_data[0];
+    $author_ids[] = $author_id;
+}
+
+$max_id = intval(max($author_ids));
+$new_author_id = strval($max_id + 1);
+
 if (isset($_POST['firstName'])) {
     $first_name = $_POST['firstName'];
 
@@ -32,7 +43,7 @@ if (!$first_name_error && !$last_name_error) {
             $_POST['grade'] = 0;
         }
 
-        $book_author = $_POST['firstName'] . ";" . $_POST['lastName'] . ";" . $_POST['grade'] . PHP_EOL;
+        $book_author = $new_author_id . ";" . $_POST['firstName'] . ";" . $_POST['lastName'] . ";" . $_POST['grade'] . PHP_EOL;
         fwrite($database_file, $book_author);
         fclose($database_file);
 
@@ -40,6 +51,18 @@ if (!$first_name_error && !$last_name_error) {
     }
 }
 
+// get authors to edit allow editing
+$authors = array();
+foreach(file('database/authors_data.txt') as $line) {
+    $author_data = explode(";", $line);
+    $author_id = $author_data[0];
+    $author_name = $author_data[1];
+    $author_last_name = $author_data[2];
+    $author_grade = trim($author_data[3]);
+
+    $author = array("author_id" => $author_id, "author_first_name" => $author_name, "author_last_name" => $author_last_name, "author_grade" => $author_grade);
+    $authors[] = $author;
+}
 
 ?>
 <main>
@@ -53,6 +76,7 @@ if (!$first_name_error && !$last_name_error) {
     <?php elseif ($last_name_error):?>
         <div id="error-block">Perekonnanimi peab olema 2 kuni 22 märki!</div>
     <?php endif;?>
+    <?php if (!isset($_GET['id'])): ?>
     <form id="input-form" method="post">
         <input name="id" type="hidden" value="">
 
@@ -96,4 +120,51 @@ if (!$first_name_error && !$last_name_error) {
             <input name="submitButton" type="submit" formaction="?cmd=author-save" value="Salvesta">
         </div>
     </form>
+    <?php endif; ?>
+    <?php if (isset($_GET['id'])): ?>
+        <form id="input-form" method="post">
+            <input name="id" type="hidden" value="">
+
+            <div class="label-cell">
+                <label for="name">Eesnimi:</label>
+            </div>
+            <div class="input-cell">
+                <?php foreach($authors as $author): ?>
+                <?php if($author["author_id"] == $_GET['id']): ?>
+                <input id="name" name="firstName" value="<?= $author["author_first_name"]; ?>" type="text">
+            </div>
+                <?php endif; ?>
+                <?php endforeach; ?>
+
+            <div class="label-cell">
+                <label for="last-name">Perkonnanimi:</label>
+            </div>
+            <div class="input-cell">
+                <?php foreach($authors as $author): ?>
+                <?php if($author["author_id"] == $_GET['id']): ?>
+                <input id="last-name" name="lastName" value="<?= $author["author_last_name"]; ?>" type="text">
+                <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+            <div class="label-cell">Hinne: </div>
+            <div class="input-cell">
+                <?php foreach(range(1, 5) as $i): ?>
+                <?php foreach($authors as $author): ?>
+                <?php if($author["author_id"] == $_GET['id']): ?>
+                        <label>
+                            <input type="radio" name="grade" value="<?= $i; ?>" <?php echo($author["author_grade"] == $i?'checked="checked"':''); ?>><?= $i; ?>
+                        </label>
+                <?php endif; ?>
+                <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="flex-break"></div>
+
+            <div class="label-cell"></div>
+            <div class="input-cell button-cell">
+                <input name="submitButton" type="submit" formaction="?cmd=author-save" value="Salvesta">
+            </div>
+        </form>
+    <?php endif; ?>
 </main>

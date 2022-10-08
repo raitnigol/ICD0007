@@ -1,5 +1,5 @@
-Raamat Of The Joakims;1;1;5;yes;1
-Raamat Of The Joakims 2;1;1;1;no;2
-Marlboro Gold;5;0;5;yes;3900909;0;0;5;yes;4
-Raamatukogu Raamat;1;5;5;yes;3900910
-123;;0;5;yes;3900911
+1;Joakim Bible;1;2;5;yes
+2;Marlboro Tobi;1;2;3;yes
+3;123;Rait;1;5;yes
+4;Henrik Raamat;Joakim Veevalaja;Rait Nigol;5;yes
+5;123;0;0;0;no
