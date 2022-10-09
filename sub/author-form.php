@@ -1,4 +1,5 @@
 <?php
+
 #var_dump($_GET);
 #var_dump($_POST);
 // set first & last name errors to false by default
@@ -31,28 +32,10 @@ if (isset($_POST['lastName'])) {
         $last_name_error = true;
     }
 }
-if (!$first_name_error && !$last_name_error) {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // write to file logic (append to fake database file)
-        $database_file = fopen('database/authors_data.txt', 'a');
-        // -> create the appendable data
-        // format is as follows:
-        // firstname;lastname;grade
-        // example: Joakim;Slim;5
-        if (!isset($_POST['grade'])) {
-            $_POST['grade'] = 0;
-        }
-
-        $book_author = $new_author_id . ";" . $_POST['firstName'] . ";" . $_POST['lastName'] . ";" . $_POST['grade'] . PHP_EOL;
-        fwrite($database_file, $book_author);
-        fclose($database_file);
-
-        header('Location: index.php?cmd=author-list&message=saved');
-    }
-}
 
 // get authors to edit allow editing
 $authors = array();
+
 foreach(file('database/authors_data.txt') as $line) {
     $author_data = explode(";", $line);
     $author_id = $author_data[0];
@@ -63,6 +46,46 @@ foreach(file('database/authors_data.txt') as $line) {
     $author = array("author_id" => $author_id, "author_first_name" => $author_name, "author_last_name" => $author_last_name, "author_grade" => $author_grade);
     $authors[] = $author;
 }
+
+if (!$first_name_error && !$last_name_error) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // clear file if id defined
+        $database_file = fopen('database/authors_data.txt', 'a');
+
+
+        // write to file logic (append to fake database file)
+        // -> create the appendable data
+        // format is as follows:
+        // firstname;lastname;grade
+        // example: Joakim;Slim;5
+
+        if (!isset($_POST['grade'])) {
+            $_POST['grade'] = 0;
+        }
+
+        if (isset($_POST['id']) && $_POST['id'] != '') {
+            $lines = file('database/authors_data.txt');
+            $result = '';
+
+            foreach($lines as $line) {
+                if(substr($line, 0, 1) == $_POST['id']) {
+                    $result .= $_POST['id'] . ";" . $_POST['firstName'] . ";" . $_POST['lastName'] . ";" . $_POST['grade'] . PHP_EOL;
+                } else {
+                    $result .= $line;
+                }
+            }
+            file_put_contents('database/authors_data.txt', $result);
+        }
+        else {
+            $book_author = $new_author_id . ";" . $_POST['firstName'] . ";" . $_POST['lastName'] . ";" . $_POST['grade'] . PHP_EOL;
+            fwrite($database_file, $book_author);
+        }
+
+        fclose($database_file);
+        header('Location: index.php?cmd=author-list&message=saved');
+    }
+}
+
 
 ?>
 <main>
@@ -88,7 +111,7 @@ foreach(file('database/authors_data.txt') as $line) {
         </div>
 
         <div class="label-cell">
-            <label for="last-name">Perkonnanimi:</label>
+            <label for="last-name">Perekonnanimi:</label>
         </div>
         <div class="input-cell">
             <input id="last-name" name="lastName" value="" type="text">
@@ -123,7 +146,7 @@ foreach(file('database/authors_data.txt') as $line) {
     <?php endif; ?>
     <?php if (isset($_GET['id'])): ?>
         <form id="input-form" method="post">
-            <input name="id" type="hidden" value="">
+            <input name="id" type="hidden" value="<?= $_GET['id'] ?? 0 ?>">
 
             <div class="label-cell">
                 <label for="name">Eesnimi:</label>
@@ -137,7 +160,7 @@ foreach(file('database/authors_data.txt') as $line) {
                 <?php endforeach; ?>
 
             <div class="label-cell">
-                <label for="last-name">Perkonnanimi:</label>
+                <label for="last-name">Perekonnanimi:</label>
             </div>
             <div class="input-cell">
                 <?php foreach($authors as $author): ?>

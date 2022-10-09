@@ -49,6 +49,7 @@ foreach(file('database/authors_data.txt') as $line) {
 }
 
 // get all books to match id
+
 $books = array();
 foreach(file('database/books_data.txt') as $line) {
     $book_data = explode(";", $line);
@@ -60,11 +61,12 @@ foreach(file('database/books_data.txt') as $line) {
     $book_is_read = $book_data[5];
 
 
-    $book = array("book_title" => $book_title, "book_author1" => $book_author1, "book_author2" => $book_author2, "book_grade" => $book_grade, "book_is_read" => $book_is_read, "book_id" => $book_id);
+    $book = array("book_id" => $book_id, "book_title" => $book_title, "book_author1" => $book_author1, "book_author2" => $book_author2, "book_grade" => $book_grade, "book_is_read" => $book_is_read);
     $books[] = $book_data;
 }
-// handle editing the book
 
+// handle editing the book
+/*
 if (isset($_GET['id'])) {
     echo "Joakim edit";
     foreach($books as $book) {
@@ -78,10 +80,10 @@ if (isset($_GET['id'])) {
         }
     }
 }
-// match book id to books
-# TODO
-# TODO
-# TODO
+*/
+
+// match book id to books (merge two arrays)
+$files = array('database/authors_data.txt', 'database/books_data.txt');
 
 // if book is not too long or too short, send POST request to index.php with the saved message
 if (!$book_error) {
@@ -100,7 +102,9 @@ if (!$book_error) {
         } elseif (isset($_POST['isRead'])) {
             $_POST['isRead'] = "yes";
         }
-
+        if (isset($_POST['id']) && $_POST['id'] != '') {
+            $room = null;
+        }
         $book = $new_book_id . ";" . $_POST['title'] . ";" . $_POST['author1'] . ";" . $_POST['author2'] . ";" . $_POST['grade'] . ";" . $_POST['isRead'] . "\n";
         fwrite($database_file, $book);
         fclose($database_file);
@@ -114,6 +118,7 @@ var_dump($_POST);
     <?php if ($book_error):?>
         <div id="error-block">Pealkiri peab olema 3 kuni 23 tähemärki!</div><br>
     <?php endif;?>
+    <?php if (!isset($_GET['id'])): ?>
     <form id="input-form" action="?cmd=book-form-submit" method="post">
         <input name="id" type="hidden" value="">
         <div class="label-cell">
@@ -194,7 +199,6 @@ var_dump($_POST);
                     <?php endif; ?>
                 <?php endforeach; ?>
             <?php endif; ?>
-
         </div>
         <div class="flex-break"></div>
         <div class="label-cell"></div>
@@ -202,4 +206,89 @@ var_dump($_POST);
             <input name="submitButton" type="submit" value="Salvesta">
         </div>
     </form>
+    <?php endif; ?>
+    <?php if (isset($_GET['id'])): ?>
+        <form id="input-form" action="?cmd=book-form-submit" method="post">
+            <input name="id" type="hidden" value="">
+            <div class="label-cell">
+                <label for="title">Pealkiri:</label>
+            </div>
+            <?php if (!(isset($_GET['id']))): ?>
+                <div class="input-cell">
+                    <input id="title" name="title" type="text" value="<?php if(isset($_POST['title'])) { echo htmlentities($_POST['title']); }?>">
+                </div>
+            <?php endif; ?>
+            <?php if (isset($_GET['id'])): ?>
+                <?php foreach($books as $book): ?>
+                    <?php if($book[0] == $_GET["id"]): ?>
+                        <div class="input-cell">
+                            <input id="title" name="title" type="text" value="<?= $book[1]; ?>">
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <div class="label-cell">
+                <label for="author1">Autor 1:</label>
+            </div>
+            <div class="input-cell">
+                <select id="author1" name="author1">
+                    <option value="0"></option>
+                    <?php foreach($authors as $author): ?>
+                        <option value="<?=$author["author_name"] . " " . $author["author_last_name"]; ?>"><?= $author["author_name"] . " " . $author["author_last_name"]; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="label-cell">
+                <label for="author2">Autor 2:</label>
+            </div>
+            <div class="input-cell">
+                <select id="author2" name="author2">
+                    <option value="0"></option>
+                    <?php foreach($authors as $author): ?>
+                        <option value="<?=$author["author_name"] . " " . $author["author_last_name"]; ?>"><?= $author["author_name"] . " " . $author["author_last_name"]; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="label-cell">Hinne: </div>
+            <div class="input-cell">
+                <?php foreach(range(1, 5) as $i): ?>
+                    <?php foreach($books as $book): ?>
+                        <?php if($book[0] == $_GET['id']): ?>
+                            <label>
+                                <input type="radio" name="grade" value="<?= $i; ?>" <?php echo($book[4] == $i?'checked="checked"' : ''); ?>><?= $i; ?>
+                            </label>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+            <div class="flex-break"></div>
+            <div class="label-cell">
+                <label for="read">Loetud:</label>
+            </div>
+            <div class="input-cell">
+                <?php if (!isset($_GET['id'])): ?>
+                    <input id="read" name="isRead" type="checkbox"/>
+                <?php endif; ?>
+                <?php if (isset($_GET['id'])): ?>
+                    <?php foreach ($books as $book): ?>
+                        <?php if ($book[0] == $_GET['id']): ?>
+                            <?php if (trim($book[5]) == "yes"): ?>
+                                <input id="read" name="isRead" type="checkbox" checked="checked"/>
+                            <?php endif; ?>
+                            <?php if (trim($book[5]) == "no"): ?>
+                                <input id="read" name="isRead" type="checkbox"/>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+            </div>
+            <div class="flex-break"></div>
+            <div class="label-cell"></div>
+            <div class="input-cell button-cell">
+                <input name="submitButton" type="submit" value="Salvesta">
+            </div>
+        </form>
+    <?php endif; ?>
 </main>

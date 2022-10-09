@@ -1,5 +1,3 @@
-1;Joakim Bible;1;2;5;yes
-2;Marlboro Tobi;1;2;3;yes
-3;123;Rait;1;5;yes
-4;Henrik Raamat;Joakim Veevalaja;Rait Nigol;5;yes
-5;123;0;0;0;no
+1;Siinus Koosiinus;Rait Nigol;Magnus Makarov;5;yes
+2;Laua Wiin;ViinaMees 33;Rait Nigol;5;yes
+3;Singi Rull;Joakims Veevalaja;Venice Maamees;3;yes
